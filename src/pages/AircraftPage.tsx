@@ -82,6 +82,9 @@ export function AircraftPage({ aircraft: a }: { aircraft: Aircraft }) {
               Figures describe the <strong>{a.specVariant}</strong>
               {a.specVariantNote && <span className="spec__note">{a.specVariantNote}</span>}
             </p>
+            <a className="button detail__compare" href={hrefFor.compare(a.id)}>
+              Compare with other jets
+            </a>
           </header>
         </div>
 

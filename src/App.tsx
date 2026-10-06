@@ -2,6 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { DEFAULT_QUERY, type Query } from './catalog/query'
 import { aircraftById } from './data'
 import { AircraftPage } from './pages/AircraftPage'
+import { ComparePage } from './pages/ComparePage'
+import { HowItsMadePage } from './pages/HowItsMadePage'
 import { HangarPage } from './pages/HangarPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { hrefFor, useRoute } from './router'
@@ -36,8 +38,9 @@ export default function App() {
   }, [route.name])
 
   useEffect(() => {
-    document.title = aircraft ? `${aircraft.shortName} · Fighter Jet Explorer` : 'Fighter Jet Explorer'
-  }, [aircraft])
+    const page = aircraft ? aircraft.shortName : route.name === 'compare' ? 'Compare' : route.name === 'making' ? 'How it’s made' : undefined
+    document.title = page ? `${page} · Fighter Jet Explorer` : 'Fighter Jet Explorer'
+  }, [aircraft, route.name])
 
   return (
     <>
@@ -58,11 +61,19 @@ export default function App() {
           <a href={hrefFor.hangar()} aria-current={route.name === 'hangar' ? 'page' : undefined}>
             Hangar
           </a>
+          <a href={hrefFor.compare()} aria-current={route.name === 'compare' ? 'page' : undefined}>
+            Compare
+          </a>
+          <a href={hrefFor.making()} aria-current={route.name === 'making' ? 'page' : undefined}>
+            How it’s made
+          </a>
         </nav>
       </header>
 
       {route.name === 'hangar' && <HangarPage query={query} onQueryChange={setQuery} />}
       {route.name === 'aircraft' && (aircraft ? <AircraftPage aircraft={aircraft} /> : <NotFoundPage what={`an aircraft called “${route.id}”`} />)}
+      {route.name === 'compare' && <ComparePage selection={route.ids} />}
+      {route.name === 'making' && <HowItsMadePage />}
       {route.name === 'not-found' && <NotFoundPage what="that page" />}
 
       <footer className="colophon">

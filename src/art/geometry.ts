@@ -33,3 +33,12 @@ export function geometryOf(a: Aircraft): Geometry | undefined {
     map: ([x, y], mirror = false) => [y * sy, (mirror ? -x : x) * sx],
   }
 }
+
+export const pts = (list: [number, number][]) => list.map(([x, y]) => `${x.toFixed(3)},${y.toFixed(3)}`).join(' ')
+
+/** The full outline (both halves) in metres, nose at x = 0, as SVG polygon points. */
+export function silhouette(g: Geometry): string {
+  const right = g.shape.outline.map((p) => g.map(p))
+  const left = [...g.shape.outline].reverse().map((p) => g.map(p, true))
+  return pts([...right, ...left])
+}

@@ -1,7 +1,7 @@
 import { useId } from 'react'
 import type { Aircraft } from '../data'
 import { formatNumber, imperial } from '../format'
-import { geometryOf, type Geometry } from './geometry'
+import { geometryOf, pts, silhouette, type Geometry } from './geometry'
 import type { Pt } from './planforms'
 
 /**
@@ -10,7 +10,7 @@ import type { Pt } from './planforms'
  * drawings at the same `frame` are at true relative scale.
  */
 
-type Finish = 'stealth' | 'grey' | 'light' | 'blue' | 'metal'
+export type Finish = 'stealth' | 'grey' | 'light' | 'blue' | 'metal'
 
 const FINISH: Record<string, Finish> = {
   'f-35a': 'stealth', 'f-35b': 'stealth', 'j-20': 'stealth', 'f-22': 'grey', 'su-57': 'blue', 'kf-21': 'grey',
@@ -28,13 +28,6 @@ const PALETTE: Record<Finish, [edge: string, mid: string, spine: string]> = {
   metal: ['#4d555c', '#9aa3ab', '#d5dbe0'],
 }
 
-const pts = (list: [number, number][]) => list.map(([x, y]) => `${x.toFixed(3)},${y.toFixed(3)}`).join(' ')
-
-function silhouette(g: Geometry): string {
-  const right = g.shape.outline.map((p) => g.map(p))
-  const left = [...g.shape.outline].reverse().map((p) => g.map(p, true))
-  return pts([...right, ...left])
-}
 
 function mirrored(g: Geometry, poly: readonly Pt[]): string[] {
   const out = [pts(poly.map((p) => g.map(p)))]
@@ -42,7 +35,7 @@ function mirrored(g: Geometry, poly: readonly Pt[]): string[] {
   return out
 }
 
-function Body({ g, uid, finish }: { g: Geometry; uid: string; finish: Finish }) {
+export function Body({ g, uid, finish }: { g: Geometry; uid: string; finish: Finish }) {
   const [edge, mid, spine] = PALETTE[finish]
   const half = g.spanM / 2
   const { shape } = g
@@ -137,7 +130,7 @@ function Body({ g, uid, finish }: { g: Geometry; uid: string; finish: Finish }) 
   )
 }
 
-function useUid(prefix: string) {
+export function useUid(prefix: string) {
   return prefix + useId().replace(/[^a-zA-Z0-9]/g, '')
 }
 
