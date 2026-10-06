@@ -2,7 +2,13 @@
 
 A dark, museum-hangar website for exploring fighter jets from newest to oldest, with sourced specifications, typed cost figures and publicly documented missile compatibility.
 
-This is **Milestone 1**: the app foundation and the sourced dataset, shown in a simple “hangar manifest”. The hangar timeline, detail pages, comparison and “How it’s made” stepper come in later milestones.
+## What’s here
+
+- **The hangar** (`#/`): every jet parked in its own floor bay, newest to oldest, grouped by decade. All jets are drawn at the same scale, so their real size differences show. A timeline rail across the top tracks where you are and jumps to any jet.
+- **Search, sort, filter and group**: search by name, nickname, maker, country or role; sort by date, name, top speed, weight or wingspan; filter by era, country, manufacturer, role and generation; group by decade, era, country, generation or primary role.
+- **Detail pages** (`#/aircraft/<id>`): an original top-down drawing dimensioned with the published length and wingspan, then specs grouped as quick overview, design and engineering, performance, service history, cost and armament. Every figure shows its unit, an imperial reading, its certainty and numbered links straight to its sources.
+
+Comparison and “How it’s made” come in the next milestone.
 
 ## Run it
 
@@ -28,7 +34,11 @@ All aircraft data lives in `src/data/`, separate from the UI:
 | `index.ts` | The catalog, sorted newest to oldest by service entry (first flight for aircraft still in development). |
 | `integrity.test.ts` | Checks that every known figure has a source, every disputed or missing figure has an explanation, dates and weights are consistent, and costs are typed. |
 
-To add an aircraft, create a file in `src/data/aircraft/`, register any new sources in `sources.ts`, and add it to the list in `index.ts`. The tests will tell you what is missing.
+To add an aircraft, create a file in `src/data/aircraft/`, register any new sources in `sources.ts`, add it to the list in `index.ts`, and draw its outline in `src/art/planforms.ts`. The tests will tell you what is missing.
+
+## Artwork
+
+The aircraft drawings are original, simplified top-down outlines drawn for this site (`src/art/planforms.ts`). The renderer stretches each outline to the record’s published length and wingspan. They are illustrations, not photographs or manufacturer drawings, and the site says so under each one.
 
 ### Rules the data follows
 
