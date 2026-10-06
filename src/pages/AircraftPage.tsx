@@ -49,6 +49,29 @@ export function AircraftPage({ aircraft: a }: { aircraft: Aircraft }) {
     return () => io.disconnect()
   }, [a.id])
 
+  // On phones the section list scrolls sideways: keep the current section in view.
+  const tocRef = useRef<HTMLUListElement>(null)
+  useEffect(() => {
+    const ul = tocRef.current
+    const btn = ul?.querySelector<HTMLElement>('[aria-current="true"]')
+    if (!ul || !btn || ul.scrollWidth <= ul.clientWidth) return
+    const left = btn.offsetLeft - ul.offsetLeft
+    if (left < ul.scrollLeft || left + btn.offsetWidth > ul.scrollLeft + ul.clientWidth) {
+      ul.scrollTo({ left: left - 16, behavior: reducedMotion() ? 'auto' : 'smooth' })
+    }
+  }, [active])
+  const [tocEdge, setTocEdge] = useState({ start: true, end: true })
+  const measureToc = () => {
+    const ul = tocRef.current
+    if (!ul) return
+    setTocEdge({ start: ul.scrollLeft <= 4, end: ul.scrollLeft + ul.clientWidth >= ul.scrollWidth - 4 })
+  }
+  useEffect(() => {
+    measureToc()
+    window.addEventListener('resize', measureToc)
+    return () => window.removeEventListener('resize', measureToc)
+  }, [])
+
   const goTo = (id: string) => {
     const el = document.getElementById(id)
     if (!el) return
@@ -96,7 +119,12 @@ export function AircraftPage({ aircraft: a }: { aircraft: Aircraft }) {
 
         <div className="page detail__body">
           <nav className="toc" aria-label="Sections">
-            <ul>
+            <ul
+              ref={tocRef}
+              data-at-start={tocEdge.start}
+              data-at-end={tocEdge.end}
+              onScroll={measureToc}
+            >
               {SECTIONS.map((s) => (
                 <li key={s.id}>
                   <button type="button" aria-current={active === s.id ? 'true' : undefined} onClick={() => goTo(s.id)}>
@@ -245,12 +273,18 @@ function ServiceTimeline({ aircraft: a }: { aircraft: Aircraft }) {
   const span = Math.max(1, end - first)
   const pct = (y: number) => `${((y - first) / span) * 100}%`
   const gap = entry !== undefined ? entry - first : undefined
+  const retired = a.status === 'retired'
 
   return (
     <figure className="lifeline">
       <div className="lifeline__bar" aria-hidden="true">
         <span className="lifeline__dev" style={{ width: entry !== undefined ? pct(entry) : '100%' }} />
-        {entry !== undefined && <span className="lifeline__svc" style={{ left: pct(entry), width: `calc(100% - ${pct(entry)})` }} />}
+        {entry !== undefined && (
+          <span
+            className={`lifeline__svc${retired ? ' lifeline__svc--retired' : ''}`}
+            style={{ left: pct(entry), width: `calc(100% - ${pct(entry)})` }}
+          />
+        )}
         <span className="lifeline__mark" style={{ left: '0%' }}>
           <b>{first}</b> first flight
         </span>
@@ -260,15 +294,17 @@ function ServiceTimeline({ aircraft: a }: { aircraft: Aircraft }) {
           </span>
         )}
         <span className="lifeline__mark lifeline__mark--end" style={{ left: '100%' }}>
-          <b>{end}</b>
+          {retired ? 'retired' : <b>{end}</b>}
         </span>
       </div>
       <figcaption>
         {gap !== undefined ? (
           <>
             {gap === 0 ? 'Entered service the same year it first flew' : `${gap} ${gap === 1 ? 'year' : 'years'} from first flight to service`}
-            , then {end - entry!} years{' '}
-            {a.status === 'retired' ? 'until the dataset’s reference year (now retired)' : `to ${end}`}. Derived from the dates below.
+            {retired
+              ? '. Now retired; this record holds no retirement date, so the bar fades out rather than guessing one.'
+              : `, then ${end - entry!} years in service to ${end}.`}{' '}
+            Derived from the dates below.
           </>
         ) : (
           <>Not yet in service: {end - first} years since first flight. Derived from the dates below.</>

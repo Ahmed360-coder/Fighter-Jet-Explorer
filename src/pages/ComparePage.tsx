@@ -3,6 +3,7 @@ import { geometryOf, silhouette } from '../art/geometry'
 import { ERAS, eraOf, timelineYear } from '../catalog/query'
 import {
   APART_REASON,
+  SUGGESTIONS,
   MAX_COMPARE,
   ROWS,
   ROW_GROUPS,
@@ -10,7 +11,7 @@ import {
   compareCosts,
   documentedMissileRoles,
   numericRowStats,
-  parseCompareIds,
+  readCompareLink,
   removeFromSlots,
   rowDiffers,
   serializeCompareIds,
@@ -26,12 +27,6 @@ import { hrefFor } from '../router'
 
 const SLOT_LETTERS = ['A', 'B', 'C'] as const
 
-const SUGGESTIONS: { label: string; ids: string }[] = [
-  { label: 'F-22 · Su-57 · J-20', ids: 'f-22,su-57,j-20' },
-  { label: 'F-35A · F-35B', ids: 'f-35a,f-35b' },
-  { label: 'F-16 · MiG-29 · Mirage 2000', ids: 'f-16,mig-29,mirage-2000' },
-  { label: 'F-86 · MiG-15', ids: 'f-86,mig-15' },
-]
 
 interface Pick {
   aircraft: Aircraft
@@ -39,7 +34,8 @@ interface Pick {
 }
 
 export function ComparePage({ selection }: { selection: string }) {
-  const slots = useMemo(() => parseCompareIds(selection), [selection])
+  const link = useMemo(() => readCompareLink(selection), [selection])
+  const { slots, unknown, overflow } = link
   const picks: Pick[] = slots.flatMap((id, slot) => (id ? [{ aircraft: aircraftById[id], slot }] : []))
   const [onlyDiff, setOnlyDiff] = useState(false)
   const headingRef = useRef<HTMLHeadingElement>(null)
@@ -64,6 +60,19 @@ export function ComparePage({ selection }: { selection: string }) {
             side when they measure the same thing.
           </p>
         </header>
+
+        {unknown.length > 0 && (
+          <p className="note compare__unknown" role="status">
+            {unknown.length === 1 ? 'There is no jet' : 'There are no jets'} called {unknown.map((id) => `“${id}”`).join(', ')} in
+            the hangar, so {unknown.length === 1 ? 'it was' : 'they were'} left out. The link may be mistyped or out of date.
+          </p>
+        )}
+        {overflow.length > 0 && (
+          <p className="note compare__unknown" role="status">
+            Compare holds {MAX_COMPARE} jets at a time, so {overflow.map((id) => aircraftById[id].shortName).join(', ')}{' '}
+            {overflow.length === 1 ? 'was' : 'were'} left out. Remove one to swap {overflow.length === 1 ? 'it' : 'them'} in.
+          </p>
+        )}
 
         <SlotPicker slots={slots} picks={picks} onAdd={(id) => go(addToSlots(slots, id))} onRemove={(id) => go(removeFromSlots(slots, id))} />
 

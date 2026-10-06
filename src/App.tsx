@@ -15,7 +15,7 @@ export default function App() {
   const hangarScroll = useRef(0)
   const lastRoute = useRef(route.name)
 
-  const aircraft = route.name === 'aircraft' ? aircraftById[route.id] : undefined
+  const aircraft = route.name === 'aircraft' && Object.hasOwn(aircraftById, route.id) ? aircraftById[route.id] : undefined
 
   // Return to where the visitor was in the hangar; start other pages at the top.
   useLayoutEffect(() => {
@@ -84,6 +84,8 @@ export default function App() {
           ones. This catalog is a selection, not a complete list of fighter aircraft. Aircraft drawings are original
           illustrations, not photographs.
         </p>
+        <p>A non-commercial, independent reference project with no ads or paid features. It is not affiliated with any
+          manufacturer, air force or government.</p>
       </footer>
     </>
   )

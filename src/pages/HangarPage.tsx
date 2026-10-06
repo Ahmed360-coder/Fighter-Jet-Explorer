@@ -23,6 +23,10 @@ export function HangarPage({ query, onQueryChange }: { query: Query; onQueryChan
     const root = listRef.current
     if (!root) return
     const bays = [...root.querySelectorAll<HTMLElement>('.bay')]
+    // With reduced motion there is no roll-in to stage: park every jet straight away.
+    const instant = reducedMotion()
+    if (instant || !('IntersectionObserver' in window)) bays.forEach((b) => b.classList.add('is-in'))
+    if (!('IntersectionObserver' in window)) return
     const reveal = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -41,7 +45,7 @@ export function HangarPage({ query, onQueryChange }: { query: Query; onQueryChan
       { rootMargin: '-45% 0px -50% 0px' },
     )
     bays.forEach((b) => {
-      reveal.observe(b)
+      if (!instant) reveal.observe(b)
       centre.observe(b)
     })
     return () => {
@@ -50,11 +54,11 @@ export function HangarPage({ query, onQueryChange }: { query: Query; onQueryChan
     }
   }, [groups])
 
-  const jumpTo = (id: string) => {
+  const jumpTo = (id: string, { instant = false, focus = true } = {}) => {
     const bay = document.getElementById(`bay-${id}`)
     if (!bay) return
-    bay.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' })
-    bay.querySelector<HTMLAnchorElement>('.bay__link')?.focus({ preventScroll: true })
+    bay.scrollIntoView({ behavior: instant || reducedMotion() ? 'auto' : 'smooth', block: 'center' })
+    if (focus) bay.querySelector<HTMLAnchorElement>('.bay__link')?.focus({ preventScroll: true })
   }
 
   return (
@@ -62,7 +66,7 @@ export function HangarPage({ query, onQueryChange }: { query: Query; onQueryChan
       <section className="hero page">
         <p className="eyebrow">The hangar · {Math.min(...years)} to {Math.max(...years)}</p>
         <h1>
-          Walk the line, <span className="nowrap">newest to oldest</span>
+          Walk the line, <span className="hero__keep">newest to oldest</span>
         </h1>
         <p className="lede">
           {catalog.length} fighters from {countryCount} countries, parked in date order and drawn at the same scale, so a

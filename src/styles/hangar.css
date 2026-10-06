@@ -9,6 +9,18 @@
   max-width: 13ch;
 }
 
+/* Keep "newest to oldest" on one line; on phones the heading shrinks to make room. */
+.hero__keep {
+  white-space: nowrap;
+}
+
+@media (max-width: 599px) {
+  .hero h1 {
+    max-width: none;
+    font-size: min(2.5rem, 10.5vw);
+  }
+}
+
 /* Search, sort and filters */
 .hangar__tools {
   border-top: 1px solid var(--line);
@@ -55,7 +67,7 @@
 }
 
 .search input::placeholder {
-  color: #6b7785;
+  color: var(--muted);
 }
 
 .search input:focus-visible {
@@ -180,6 +192,10 @@
   height: 2.6rem;
   margin: 0 0.5rem;
   border-bottom: 1px solid var(--line-strong);
+  /* Horizontal drags scrub the timeline; vertical ones still scroll the page. */
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .rail__decade {

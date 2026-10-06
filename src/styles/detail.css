@@ -175,6 +175,18 @@
     overflow-x: auto;
     border-left: 0;
     scrollbar-width: none;
+    /* Fade the cut-off edge so it reads as "more this way". */
+    --fade-start: 2rem;
+    --fade-end: 2.5rem;
+    mask-image: linear-gradient(90deg, transparent, #000 var(--fade-start), #000 calc(100% - var(--fade-end)), transparent);
+  }
+
+  .toc ul[data-at-start='true'] {
+    --fade-start: 0px;
+  }
+
+  .toc ul[data-at-end='true'] {
+    --fade-end: 0px;
   }
 
   .toc button {
@@ -266,7 +278,7 @@
   font: 400 0.78rem/1.35 var(--font-body);
   text-transform: none;
   letter-spacing: 0;
-  color: #6f7c89;
+  color: #808d9a;
 }
 
 .spec dd {
@@ -422,6 +434,11 @@
 
 .lifeline__mark--end {
   transform: translateX(-100%);
+}
+
+/* Retired: the record has no retirement date, so service fades out instead of running to today. */
+.lifeline__svc--retired {
+  background: linear-gradient(90deg, var(--amber) 0 35%, rgb(232 163 61 / 0) 100%);
 }
 
 .lifeline figcaption {
