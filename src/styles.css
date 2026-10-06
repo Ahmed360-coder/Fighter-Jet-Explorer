@@ -147,6 +147,11 @@ select {
   transform: rotate(-90deg);
 }
 
+.topbar nav {
+  display: flex;
+  gap: clamp(0.75rem, 3vw, 1.75rem);
+}
+
 .topbar nav a {
   display: inline-flex;
   align-items: center;
@@ -342,5 +347,25 @@ h1 {
     transition: none !important;
     animation: none !important;
     scroll-behavior: auto !important;
+  }
+}
+
+.topbar nav a {
+  white-space: nowrap;
+}
+
+/* On phones the plane mark stands in for the wordmark so all three sections fit. */
+@media (max-width: 519px) {
+  .wordmark span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .topbar nav a {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
   }
 }

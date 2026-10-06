@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import './styles.css'
 import './styles/hangar.css'
 import './styles/detail.css'
+import './styles/compare.css'
+import './styles/making.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(

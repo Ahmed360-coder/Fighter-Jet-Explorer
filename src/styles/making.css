@@ -1,0 +1,522 @@
+/* How it's made: a six-stage stepper over an exploded-view drawing. */
+
+.making__head {
+  padding: clamp(2rem, 6vw, 4rem) 0 2rem;
+}
+
+/* Stage rail */
+.stepper__rail {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+  margin-bottom: 1.25rem;
+}
+
+.stepper__tab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-height: 44px;
+  padding: 0.85rem 0.75rem 0.75rem;
+  border: 0;
+  border-top: 2px solid var(--line-strong);
+  background: none;
+  color: var(--muted);
+  text-align: left;
+  cursor: pointer;
+  transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
+}
+
+.stepper__tab:hover {
+  color: var(--text);
+  background: rgb(255 255 255 / 0.02);
+}
+
+.stepper__tab[data-state='done'] {
+  border-top-color: var(--amber-dim);
+}
+
+.stepper__tab[aria-selected='true'] {
+  border-top-color: var(--amber);
+  color: var(--text);
+  background: linear-gradient(rgb(232 163 61 / 0.08), transparent);
+}
+
+.stepper__num {
+  font: 500 0.72rem/1 var(--font-mono);
+  letter-spacing: 0.1em;
+  color: var(--amber);
+}
+
+.stepper__tab[data-state='todo'] .stepper__num {
+  color: var(--muted);
+}
+
+.stepper__name {
+  font: 600 1rem/1.1 var(--font-display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 719px) {
+  .stepper__tab {
+    align-items: center;
+    padding: 0.75rem 0;
+  }
+  .stepper__name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .stepper__num {
+    font-size: 0.85rem;
+  }
+}
+
+.stepper__body {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 960px) {
+  .stepper__body {
+    grid-template-columns: minmax(0, 1.55fr) minmax(19rem, 1fr);
+    gap: 2.5rem;
+    align-items: start;
+  }
+}
+
+.stepper__figure {
+  margin: 0;
+  padding: clamp(0.5rem, 2vw, 1rem);
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 50%, rgb(111 142 168 / 0.08), transparent 70%),
+    var(--bg-sunk);
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.stepper__figure figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.stepper__count {
+  margin-right: 0.75rem;
+  font: 500 0.75rem/1 var(--font-mono);
+  color: var(--amber);
+}
+
+.syskey {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.25rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.syskey li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.syskey__swatch {
+  width: 1.2rem;
+  height: 0.6rem;
+}
+
+.syskey__swatch--wire {
+  border-top: 2px dashed var(--amber);
+  height: 0;
+}
+.syskey__swatch--hyd {
+  border-top: 2px solid var(--steel);
+  height: 0;
+}
+.syskey__swatch--fuel {
+  border: 1px solid #6aa486;
+  background: rgb(106 164 134 / 0.25);
+  border-radius: 2px;
+}
+.syskey__swatch--kit {
+  border: 1px solid var(--text);
+  border-radius: 2px;
+}
+
+/* Panel */
+.stepper__panel {
+  animation: panel-in 360ms var(--ease-out);
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.stepper__kicker {
+  margin: 0 0 0.4rem;
+  font: 500 0.75rem/1.2 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.stepper__panel h2 {
+  margin: 0 0 0.75rem;
+  font: 700 clamp(1.9rem, 4vw, 2.6rem) / 0.95 var(--font-display);
+  text-transform: uppercase;
+}
+
+.stepper__summary {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+}
+
+.stepper__points {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.stepper__points li {
+  padding-left: 1.1rem;
+  border-left: 2px solid var(--line-strong);
+}
+
+.stepper__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.button--ghost {
+  border-color: var(--line-strong);
+  background: none;
+  color: var(--text);
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.making__foot {
+  margin-top: 2rem;
+}
+
+/* ---------- The drawing ---------- */
+
+.assembly {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+
+.assembly .part,
+.assembly .airframe,
+.assembly .wire,
+.assembly .flow,
+.assembly .sys,
+.assembly .part__edge,
+.assembly .part__label,
+.assembly .checks,
+.assembly .telemetry,
+.assembly .streaks,
+.assembly .jet__exhaust,
+.assembly .part > g {
+  transition:
+    transform 900ms var(--ease-out),
+    opacity 500ms ease,
+    filter 500ms ease;
+}
+
+.part__edge polygon {
+  fill: none;
+  stroke: var(--amber);
+  stroke-width: 0.07;
+}
+
+.part__edge {
+  opacity: 0;
+}
+
+.part__label {
+  fill: var(--text);
+  font: 500 0.55px var(--font-mono);
+  letter-spacing: 0.04px;
+  text-transform: uppercase;
+  opacity: 0;
+}
+
+.sys {
+  opacity: 0;
+  fill: none;
+  stroke-width: 0.08;
+}
+
+.sys__wire {
+  stroke: var(--amber);
+  stroke-dasharray: 0.25 0.15;
+}
+.sys__hyd {
+  stroke: var(--steel);
+  stroke-width: 0.1;
+}
+.sys__fuel {
+  fill: rgb(106 164 134 / 0.25);
+  stroke: #6aa486;
+  stroke-width: 0.06;
+}
+.sys__seat,
+.sys__avionics,
+.sys__radar,
+.sys__engine {
+  stroke: var(--text);
+  stroke-width: 0.07;
+}
+.sys__engine {
+  fill: rgb(221 226 231 / 0.08);
+}
+.sys__engine-rib {
+  stroke: rgb(221 226 231 / 0.4);
+  stroke-width: 0.05;
+}
+
+.wire {
+  fill: rgb(7 9 12 / 0.92);
+  stroke: var(--amber);
+  stroke-width: 0.06;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+
+.flow {
+  fill: none;
+  stroke: var(--steel);
+  stroke-width: 0.045;
+  stroke-dasharray: 0.6 0.5;
+  opacity: 0;
+}
+
+.joins line {
+  stroke: var(--amber);
+  stroke-width: 0.12;
+  stroke-linecap: round;
+  opacity: 0;
+}
+
+.checks {
+  opacity: 0;
+}
+.checks__dot {
+  fill: var(--amber);
+}
+.checks__ring {
+  fill: none;
+  stroke: var(--amber);
+  stroke-width: 0.06;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.telemetry {
+  opacity: 0;
+}
+.telemetry circle {
+  fill: none;
+  stroke: var(--steel);
+  stroke-width: 0.06;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.streaks {
+  opacity: 0;
+}
+.streaks line {
+  stroke: rgb(221 226 231 / 0.35);
+  stroke-width: 0.05;
+  stroke-dasharray: 1.6 4;
+}
+
+.assembly .jet__exhaust {
+  opacity: 0;
+}
+
+/* Design: wireframe and airflow only. */
+[data-stage='design'] .airframe {
+  opacity: 0;
+}
+[data-stage='design'] .wire {
+  opacity: 1;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1600ms var(--ease-out), opacity 300ms ease;
+}
+[data-stage='design'] .flow {
+  opacity: 0.8;
+  animation: flow 3s linear infinite;
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -2.2;
+  }
+}
+
+/* Fabrication: sections apart, bare material, labelled. */
+[data-stage='fabrication'] .part {
+  transform: translate(var(--dx), var(--dy));
+}
+[data-stage='fabrication'] .part > g {
+  filter: grayscale(1) brightness(1.7) contrast(0.85);
+}
+[data-stage='fabrication'] .part__edge,
+[data-stage='fabrication'] .part__label {
+  opacity: 1;
+}
+
+/* Integration: sections open a little less, systems visible inside. */
+[data-stage='integration'] .part {
+  transform: translate(calc(var(--dx) * 0.6), calc(var(--dy) * 0.6));
+}
+[data-stage='integration'] .part > g {
+  filter: grayscale(1) brightness(0.9);
+  opacity: 0.45;
+}
+[data-stage='integration'] .part__edge {
+  opacity: 0.5;
+}
+[data-stage='integration'] .sys {
+  opacity: 1;
+}
+
+/* Assembly: sections meet; joins flash. */
+[data-stage='assembly'] .joins line {
+  animation: join 1.4s 700ms ease-out both;
+}
+
+@keyframes join {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.25;
+  }
+}
+
+/* Ground testing: engine run and test points. */
+[data-stage='ground'] .checks,
+[data-stage='ground'] .jet__exhaust {
+  opacity: 1;
+}
+[data-stage='ground'] .jet__exhaust {
+  animation: idle 1.2s ease-in-out infinite alternate;
+}
+[data-stage='ground'] .checks__ring {
+  animation: ping 2.1s ease-out infinite;
+}
+
+@keyframes idle {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 0.9;
+  }
+}
+
+@keyframes ping {
+  0% {
+    transform: scale(0.4);
+    opacity: 1;
+  }
+  80%,
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* Flight: full afterburner glow, speed streaks, telemetry. */
+[data-stage='flight'] .jet__exhaust,
+[data-stage='flight'] .streaks,
+[data-stage='flight'] .telemetry {
+  opacity: 1;
+}
+[data-stage='flight'] .airframe {
+  animation: bob 4s ease-in-out infinite alternate;
+}
+[data-stage='flight'] .streaks line {
+  animation: streak 0.9s linear infinite;
+}
+[data-stage='flight'] .telemetry circle {
+  animation: telemetry 2.4s ease-out infinite;
+}
+
+@keyframes bob {
+  from {
+    transform: translate(-0.3px, -0.25px);
+  }
+  to {
+    transform: translate(0.3px, 0.25px);
+  }
+}
+
+@keyframes streak {
+  to {
+    stroke-dashoffset: -5.6;
+  }
+}
+
+@keyframes telemetry {
+  0% {
+    transform: scale(0.3);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(5);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 559px) {
+  .part__label {
+    display: none;
+  }
+}
+
+/* Reduced motion: the global rule removes transitions and animations; keep static end states legible. */
+@media (prefers-reduced-motion: reduce) {
+  [data-stage='assembly'] .joins line {
+    opacity: 0.6;
+  }
+  [data-stage='ground'] .checks__ring {
+    transform: scale(1.2);
+    opacity: 0.6;
+  }
+  [data-stage='flight'] .telemetry circle {
+    transform: scale(2.5);
+    opacity: 0.4;
+  }
+}
