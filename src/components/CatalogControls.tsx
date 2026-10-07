@@ -31,7 +31,7 @@ export function CatalogControls({ query, onChange, facets, shown, total }: Props
     <form className="controls" role="search" aria-label="Search and filter the hangar" onSubmit={(e) => e.preventDefault()}>
       <div className="controls__top">
         <label className="search">
-          <span className="sr-only">Search aircraft</span>
+          <span className="sr-only">Search aircraft by name, nickname, maker, country or role</span>
           <svg viewBox="0 0 20 20" aria-hidden="true">
             <circle cx="8.5" cy="8.5" r="5.5" />
             <path d="m13 13 4.5 4.5" />
@@ -40,7 +40,7 @@ export function CatalogControls({ query, onChange, facets, shown, total }: Props
             type="search"
             value={query.text}
             onChange={(e) => set('text', e.target.value)}
-            placeholder="Search by name, maker, country or role"
+            placeholder="Search the hangar"
             autoComplete="off"
             spellCheck={false}
           />

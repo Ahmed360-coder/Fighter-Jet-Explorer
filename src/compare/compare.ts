@@ -17,20 +17,46 @@ export const MAX_COMPARE = 3
  */
 export type Slots = (string | null)[]
 
-export function parseCompareIds(raw: string | undefined): Slots {
-  if (!raw) return []
+/** Ready-made pairings offered on an empty compare page. */
+export const SUGGESTIONS: { label: string; ids: string }[] = [
+  { label: 'F-22 · Su-57 · J-20', ids: 'f-22,su-57,j-20' },
+  { label: 'F-35A · F-35B', ids: 'f-35a,f-35b' },
+  { label: 'F-16 · MiG-29 · Mirage 2000', ids: 'f-16,mig-29,mirage-2000' },
+  { label: 'F-86 · MiG-15', ids: 'f-86,mig-15' },
+]
+
+export interface CompareLink {
+  slots: Slots
+  /** Ids that name no aircraft, in the order they appear. */
+  unknown: string[]
+  /** Real jets left out because the link holds more than MAX_COMPARE. */
+  overflow: string[]
+}
+
+/** Reads a compare link, keeping what it can and saying what it dropped. */
+export function readCompareLink(raw: string | undefined): CompareLink {
+  const link: CompareLink = { slots: [], unknown: [], overflow: [] }
+  if (!raw) return link
   const seen = new Set<string>()
   const slots: Slots = []
   for (const token of raw.split(',').map((s) => s.trim())) {
     if (token === '') slots.push(null)
-    else if (token in aircraftById && !seen.has(token)) {
+    else if (!Object.hasOwn(aircraftById, token)) {
+      if (!link.unknown.includes(token)) link.unknown.push(token)
+    } else if (!seen.has(token)) {
       seen.add(token)
       slots.push(token)
     }
   }
   const kept = slots.slice(0, MAX_COMPARE)
   while (kept.length && kept[kept.length - 1] === null) kept.pop()
-  return kept
+  link.slots = kept
+  link.overflow = slots.slice(MAX_COMPARE).filter((id): id is string => id !== null)
+  return link
+}
+
+export function parseCompareIds(raw: string | undefined): Slots {
+  return readCompareLink(raw).slots
 }
 
 export function serializeCompareIds(slots: readonly (string | null)[]): string {
